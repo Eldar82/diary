@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ежедневник руководителя</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self' https://*.bitrix24.ru; worker-src 'self'; manifest-src 'self'; form-action 'none'; base-uri 'none'; object-src 'none'; frame-src 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#3d6fd9">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<style>
+/* всегда светлая тема: мягкий фон, без тёмного режима */
+:root{color-scheme:light;--bg:#f3f5fa;--field:#f7f8fc;--card:rgba(255,255,255,.92);--text:#1f2a3d;--muted:#667085;--line:#e2e7f0;--accent:#3d6fd9;--accent-soft:#e7eefc;--ok:#2f9e6a;--bad:#d9483b;--bad-soft:#fdeceb}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:var(--text);min-height:100vh;background:#eef3fb linear-gradient(160deg,#e9f1fc 0%,#f4f1fa 45%,#fbf3ea 100%) fixed}
+header{background:rgba(255,255,255,.85);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.wrap{max-width:1140px;margin:0 auto;padding:0 16px}
+.top{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:10px 0}
+.top h1{font-size:18px;margin:0}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{background:none;border:0;padding:8px 12px;border-radius:8px;color:var(--muted);font:inherit;cursor:pointer}
+nav button.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+main{padding:20px 0 60px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 2px 10px rgba(40,60,110,.06);padding:16px;margin-bottom:16px}
+.card h2{font-size:16px;margin:0 0 12px}
+.grid{display:grid;gap:16px;grid-template-columns:1fr 1fr}
+.grid>div{min-width:0}
+@media(max-width:820px){.grid{grid-template-columns:1fr}}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.between{justify-content:space-between}
+input,select,textarea{font:inherit;color:inherit;background:var(--field);border:1px solid var(--line);border-radius:8px;padding:7px 10px;max-width:100%}
+textarea{width:100%;min-height:120px;resize:vertical}
+.grow{flex:1;min-width:150px}
+.btn{font:inherit;border:1px solid var(--line);background:var(--card);color:var(--text);padding:7px 14px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.danger{color:var(--bad)}
+.btn.rec{background:var(--bad);border-color:var(--bad);color:#fff;animation:pulse 1.4s infinite}
+.btn.sm{padding:3px 9px;font-size:13px}
+@keyframes pulse{50%{opacity:.75}}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:7px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:500}
+td input[type=text]{width:100%}
+.scroll{overflow-x:auto}
+.task{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--line)}
+.task:last-child{border-bottom:0}
+.task .t{flex:1;min-width:0}
+.task input[type=checkbox]{margin-top:4px;width:17px;height:17px}
+.task.done .title{text-decoration:line-through;color:var(--muted)}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:10px;background:var(--accent-soft);color:var(--accent);margin:2px 4px 0 0}
+.tag.over{background:var(--bad-soft);color:var(--bad)}
+.tag.grey{background:var(--bg);color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media(max-width:700px){.stats{grid-template-columns:repeat(2,1fr)}}
+.stat{background:var(--bg);border-radius:10px;padding:12px}
+.stat b{display:block;font-size:24px}
+.bars{display:flex;gap:10px;align-items:flex-end;height:150px;margin-top:8px}
+.day{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%}
+.day .cols{flex:1;width:100%;display:flex;gap:3px;align-items:flex-end;justify-content:center}
+.day .cols div{width:40%;max-width:22px;border-radius:4px 4px 0 0;min-height:2px}
+.c1{background:var(--accent)}.c2{background:var(--ok)}
+.legend span{display:inline-flex;align-items:center;gap:5px;margin-right:14px}
+.legend i{width:10px;height:10px;border-radius:2px;display:inline-block}
+.interim{color:var(--muted);font-style:italic;min-height:1.4em;margin:4px 0 8px}
+.stars button{background:none;border:0;font-size:22px;cursor:pointer;color:var(--line);padding:0 2px}
+.stars button.on{color:#f5b301}
+.group h3{font-size:14px;margin:14px 0 4px;color:var(--muted)}
+.hint{background:var(--accent-soft);border-radius:8px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+a{color:var(--accent)}
+.pbar{height:6px;background:var(--bg);border-radius:3px;overflow:hidden;min-width:60px}
+.pbar div{height:100%;background:var(--ok)}
+/* экран ПИН-кода */
+#lock{position:fixed;inset:0;z-index:50;display:flex;overflow:auto;padding:16px;background:#eef3fb linear-gradient(160deg,#e9f1fc 0%,#f4f1fa 45%,#fbf3ea 100%)}
+#lock .box{margin:auto;background:#fff;border:1px solid var(--line);border-radius:18px;padding:26px 22px;text-align:center;width:min(340px,100%);box-shadow:0 8px 30px rgba(40,60,110,.12)}
+.dots{display:flex;gap:16px;justify-content:center;margin:18px 0 6px}
+.dots i{width:16px;height:16px;border-radius:50%;border:2px solid var(--accent)}
+.dots i.f{background:var(--accent)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+.pad button{font:inherit;font-size:24px;height:62px;border-radius:14px;border:1px solid var(--line);background:var(--field);color:var(--text);cursor:pointer;touch-action:manipulation}
+.pad button:active{background:var(--accent-soft)}
+.pad button.small{font-size:14px;color:var(--muted);background:none;border-color:transparent}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+/* планшет и сенсорный экран */
+@media (pointer:coarse){
+  body{font-size:16px}
+  .btn{padding:11px 18px}.btn.sm{padding:7px 12px}
+  input,select{min-height:44px}
+  nav button{padding:11px 14px}
+  .task input[type=checkbox],td input[type=checkbox]{width:26px;height:26px}
+  .stars button{font-size:30px;padding:0 4px}
+  #recBtn{padding:14px 24px;font-size:17px}
+}
+</style>
+</head>
+<body>
+<header><div class="wrap top">
+  <h1>📓 Ежедневник</h1>
+  <nav>
+    <button data-v="day" onclick="setView('day')">День</button>
+    <button data-v="meeting" onclick="setView('meeting')">Совещание</button>
+    <button data-v="tasks" onclick="setView('tasks')">Поручения</button>
+    <button data-v="stats" onclick="setView('stats')">Аналитика</button>
+    <button data-v="people" onclick="setView('people')">Сотрудники и данные</button>
+  </nav>
+</div></header>
+<main class="wrap" id="main"></main>
+
+<script>
+const KEY='diary.v1';
+const $=s=>document.querySelector(s);
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parseYmd=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const addDays=(s,n)=>{const d=parseYmd(s);d.setDate(d.getDate()+n);return ymd(d)};
+const today=()=>ymd(new Date());
+const monday=s=>addDays(s,-((parseYmd(s).getDay()+6)%7));
+const ruDate=s=>s?parseYmd(s).toLocaleDateString('ru-RU',{day:'numeric',month:'short'}):'';
+const dmy=s=>s?s.split('-').reverse().join('.'):'—';
+const longDate=s=>parseYmd(s).toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const escRe=s=>s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const cap=s=>s?s[0].toUpperCase()+s.slice(1):s;
+const STATUS={new:'Новая',progress:'В работе',done:'Выполнена'};
+
+// ---------- хранение ----------
+const EMPTY=()=>({employees:[],days:{},tasks:[],meetings:[],settings:{}});
+// при включённом ПИН данные зашифрованы и читаются только после ввода ПИН
+let S=(()=>{try{return localStorage.getItem('diary.pin')}catch(e){return null}})()?EMPTY():load();
+function load(){try{return Object.assign(EMPTY(),JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){return EMPTY()}}
+// Каждой записи ставится время последнего изменения (upd), удалённым — «надгробие» в S.deleted.
+// По ним данные с двух устройств объединяются без потерь: побеждает более свежая версия.
+let snapMap=null;
+function stamp(){
+  const now=Date.now(), cur=new Map();
+  const put=(k,o)=>{const{upd,...rest}=o;cur.set(k,[o,JSON.stringify(rest)])};
+  S.employees.forEach(e=>put('e:'+e.id,e));S.tasks.forEach(t=>put('t:'+t.id,t));S.meetings.forEach(m=>put('m:'+m.id,m));
+  Object.entries(S.days).forEach(([d,v])=>put('d:'+d,v));
+  S.deleted=S.deleted||{};
+  if(snapMap){
+    for(const[k,[o,j]]of cur)if(snapMap.get(k)!==j)o.upd=now;
+    for(const k of snapMap.keys())if(!cur.has(k)&&!k.startsWith('d:'))S.deleted[k.slice(2)]=now;
+  }else for(const[,[o]]of cur)if(!o.upd)o.upd=now;
+  for(const[id,t]of Object.entries(S.deleted))if(now-t>180*864e5)delete S.deleted[id];
+  snapMap=new Map([...cur].map(([k,[,j]])=>[k,j]));
+}
+function mergeIn(d){
+  const n={emp:0,task:0,meet:0,day:0}, my=S.deleted=S.deleted||{};
+  Object.entries(d.deleted||{}).forEach(([id,t])=>{if(!my[id]||my[id]<t)my[id]=t});
+  const dead=o=>my[o.id]&&my[o.id]>=(o.upd||0), newer=(a,b)=>(a.upd||0)>(b.upd||0);
+  const nm=x=>String(x||'').toLowerCase().replace(/ё/g,'е').replace(/\s+/g,' ').trim();
+  const map={};
+  for(const e of d.employees||[]){
+    const l=S.employees.find(x=>x.id===e.id)||S.employees.find(x=>nm(x.name)===nm(e.name));
+    if(l){map[e.id]=l.id;if(newer(e,l)){Object.assign(l,e,{id:l.id});n.emp++}}
+    else if(!dead(e)){S.employees.push(Object.assign({},e));map[e.id]=e.id;n.emp++}
+  }
+  const fix=t=>Object.assign({},t,{assignee:t.assignee?(map[t.assignee]||t.assignee):''});
+  for(const t of d.tasks||[]){const l=S.tasks.find(x=>x.id===t.id);
+    if(l){if(newer(t,l)){Object.assign(l,fix(t));n.task++}}else if(!dead(t)){S.tasks.push(fix(t));n.task++}}
+  for(const m of d.meetings||[]){const l=S.meetings.find(x=>x.id===m.id);
+    if(l){if(newer(m,l)){Object.assign(l,m);n.meet++}}else if(!dead(m)){S.meetings.push(Object.assign({},m));n.meet++}}
+  for(const[k,v]of Object.entries(d.days||{}))if(!S.days[k]||newer(v,S.days[k])){S.days[k]=v;n.day++}
+  S.employees=S.employees.filter(e=>!dead(e));S.tasks=S.tasks.filter(t=>!dead(t));S.meetings=S.meetings.filter(m=>!dead(m));
+  ['b24','myB24'].forEach(k=>{if(!S.settings[k]&&d.settings?.[k])S.settings[k]=d.settings[k]});
+  snapMap=null;stamp(); // принятые версии сохраняют своё время изменения
+  return n;
+}
+let saving=Promise.resolve();
+function save(){
+  stamp();
+  const snap=JSON.stringify(S);
+  if(pinRec()){
+    // никогда не пишем открытым текстом, если ПИН включён
+    const k=cryptoKey;if(!k)return;
+    saving=saving.then(()=>encWith(k,snap)).then(e=>localStorage.setItem(KEY,e)).catch(e=>alert('Не удалось сохранить данные: '+e.message));
+    return;
+  }
+  try{localStorage.setItem(KEY,snap)}catch(e){alert('Не удалось сохранить данные: '+e.message)}
+}
+
+let view='day', curDate=today(), weekStart=monday(today());
+let fA='all', fS='open';
+let M=newDraft(), cands=[];
+function newDraft(){return {id:uid(),date:today(),title:'',transcript:''}}
+
+const emp=id=>S.employees.find(e=>e.id===id);
+const empName=id=>id?(emp(id)?.name||'—'):'Я';
+const empOpts=sel=>`<option value="">Я</option>`+S.employees.map(e=>`<option value="${e.id}" ${e.id===sel?'selected':''}>${esc(e.name)}${e.position?' — '+esc(e.position):''}</option>`).join('');
+const isOver=t=>t.status!=='done'&&t.due&&t.due<today();
+
+function setView(v){view=v;render()}
+function render(){
+  if(!unlocked)return;
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===view));
+  $('#main').innerHTML={day:vDay,meeting:vMeeting,tasks:vTasks,stats:vStats,people:vPeople}[view]();
+}
+
+// ---------- задачи ----------
+function taskRow(t,full){
+  const ov=isOver(t), mt=t.meetingId&&S.meetings.find(x=>x.id===t.meetingId);
+  return `<div class="task ${t.status==='done'?'done':''}">
+    <input type="checkbox" ${t.status==='done'?'checked':''} onchange="toggleTask('${t.id}')" title="Выполнено">
+    <div class="t"><div class="title">${esc(t.title)}</div>
+      <div class="small">${full?'':`<span class="tag">${esc(empName(t.assignee))}</span>`}${t.due?`<span class="tag ${ov?'over':''}">${ov?'просрочено · ':''}до ${ruDate(t.due)}</span>`:''}${!full&&t.status==='progress'?'<span class="tag">в работе</span>':''}${mt?`<span class="tag grey">${esc(mt.title)} ${ruDate(mt.date)}</span>`:''}</div>
+      ${full?`<div class="row small" style="margin-top:6px">
+        <select onchange="setTask('${t.id}','assignee',this.value)">${empOpts(t.assignee)}</select>
+        <select onchange="setStatus('${t.id}',this.value)">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${k===t.status?'selected':''}>${v}</option>`).join('')}</select>
+        <input type="date" value="${t.due||''}" onchange="setTask('${t.id}','due',this.value)">
+      </div>`:''}
+    </div>
+    <button class="btn sm danger" onclick="delTask('${t.id}')" title="Удалить">✕</button>
+  </div>`;
+}
+function addTask(o){const t=Object.assign({id:uid(),title:'',assignee:'',due:'',status:'new',created:today(),doneAt:null,meetingId:null},o);S.tasks.push(t);return t}
+function toggleTask(id){const t=S.tasks.find(x=>x.id===id);setStatus(id,t.status==='done'?'new':'done')}
+function setStatus(id,st){const t=S.tasks.find(x=>x.id===id);t.status=st;t.doneAt=st==='done'?today():null;save();render()}
+function setTask(id,k,v){S.tasks.find(x=>x.id===id)[k]=v;save();render()}
+function delTask(id){if(!confirm('Удалить задачу?'))return;S.tasks=S.tasks.filter(x=>x.id!==id);save();render()}
+
+// ---------- ДЕНЬ ----------
+function vDay(){
+  const d=curDate, day=S.days[d]||{}, t0=today();
+  const list=S.tasks.filter(t=>t.due===d||(!t.due&&t.created===d));
+  const over=d===t0?S.tasks.filter(t=>isOver(t)):[];
+  const meets=S.meetings.filter(x=>x.date===d);
+  return `
+  <div class="card row between">
+    <div class="row"><button class="btn" onclick="shiftDay(-1)">←</button>
+      <input type="date" value="${d}" onchange="curDate=this.value||today();render()">
+      <button class="btn" onclick="shiftDay(1)">→</button>
+      ${d!==t0?`<button class="btn" onclick="curDate=today();render()">Сегодня</button>`:''}</div>
+    <b>${cap(longDate(d))}</b>
+  </div>
+  <div class="grid">
+    <div>
+      <div class="card"><h2>Задачи на день</h2>
+        <div class="row" style="margin-bottom:8px"><input type="text" id="qt" class="grow" placeholder="Новая задача…" onkeydown="if(event.key==='Enter')quickAdd()">
+          <select id="qa">${empOpts('')}</select><button class="btn primary" onclick="quickAdd()">Добавить</button></div>
+        ${list.length?list.map(t=>taskRow(t)).join(''):'<p class="muted small">На этот день задач нет.</p>'}
+      </div>
+      ${over.length?`<div class="card"><h2 style="color:var(--bad)">Просрочено (${over.length})</h2>${over.map(t=>taskRow(t)).join('')}</div>`:''}
+      ${meets.length?`<div class="card"><h2>Совещания</h2>${meets.map(x=>`<div class="task"><div class="t"><a href="#" onclick="openMeeting('${x.id}');return false">${esc(x.title)}</a> <span class="muted small">· поручений: ${S.tasks.filter(t=>t.meetingId===x.id).length}</span></div></div>`).join('')}</div>`:''}
+    </div>
+    <div>
+      <div class="card"><h2>Записи дня</h2>
+        <textarea placeholder="События, мысли, договорённости, звонки…" oninput="setDay('notes',this.value)">${esc(day.notes||'')}</textarea></div>
+      <div class="card"><h2>Итоги дня</h2>
+        <textarea style="min-height:90px" placeholder="Что сделано · что не получилось и почему · что переносится на завтра" oninput="setDay('summary',this.value)">${esc(day.summary||'')}</textarea>
+        <div class="row" style="margin-top:8px"><span class="muted small">Оценка дня:</span>
+          <span class="stars">${[1,2,3,4,5].map(i=>`<button class="${(day.rating||0)>=i?'on':''}" onclick="setDay('rating',${i});render()">★</button>`).join('')}</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+function shiftDay(n){curDate=addDays(curDate,n);render()}
+function setDay(k,v){S.days[curDate]=Object.assign({},S.days[curDate],{[k]:v});save()}
+function quickAdd(){const v=$('#qt').value.trim();if(!v)return;addTask({title:v,assignee:$('#qa').value,due:curDate});save();render();$('#qt').focus()}
+
+// ---------- СОВЕЩАНИЕ: распознавание речи ----------
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null, recOn=false, speechMode='';
+async function speechLocal(){
+  // распознавание на самом устройстве (новые версии Chrome): голос не уходит в интернет
+  if(!SR||!('processLocally' in SR.prototype)||typeof SR.available!=='function')return false;
+  const o={langs:['ru-RU'],processLocally:true};
+  try{
+    let st=await SR.available(o);
+    if((st==='downloadable'||st==='downloading')&&confirm('Можно скачать русский языковой пакет, чтобы речь распознавалась прямо на планшете, без отправки голоса в интернет. Скачать (один раз)?')){
+      await SR.install(o);st=await SR.available(o);
+    }
+    return st==='available';
+  }catch(e){return false}
+}
+async function startRec(){
+  if(!SR){alert('Этот браузер не поддерживает распознавание речи. Откройте ежедневник в Google Chrome — либо вставьте текст расшифровки вручную.');return}
+  const local=await speechLocal();
+  if(!local&&!S.settings.cloudSpeech){
+    if(!confirm('На этом устройстве распознавание речи без интернета недоступно.\n\nЕсли продолжить, браузер будет отправлять звук на серверы Google (за пределами РФ). Тогда не называйте вслух персональные данные: паспорта, адреса, телефоны, здоровье, зарплаты. Фамилии и поручения — на ваше усмотрение.\n\nРазрешить облачное распознавание?'))return;
+    S.settings.cloudSpeech=true;save();
+  }
+  // на Android непрерывный режим дублирует фразы — слушаем по одной фразе и сразу перезапускаем
+  rec=new SR();rec.lang='ru-RU';rec.continuous=!/Android/i.test(navigator.userAgent);rec.interimResults=true;
+  if(local)rec.processLocally=true;
+  speechMode=local?'🔒 на устройстве':'☁ через Google';
+  rec.onresult=e=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const r=e.results[i];if(r.isFinal)appendTr(r[0].transcript);else interim+=r[0].transcript}const el=$('#interim');if(el)el.textContent=interim};
+  rec.onerror=e=>{
+    if(['not-allowed','service-not-allowed','audio-capture'].includes(e.error)){recOn=false;alert('Нет доступа к микрофону ('+e.error+'). Разрешите микрофон для этой страницы в настройках браузера.')}
+    else if(e.error==='network'){recOn=false;alert('Сервис распознавания речи браузера недоступен (нет сети или он заблокирован). Используйте Яндекс Браузер или вариант с локальным распознаванием Whisper — см. инструкцию.')}
+  };
+  rec.onend=()=>{if(recOn){try{rec.start()}catch(_){}}else recUi()};
+  recOn=true;
+  try{rec.start()}catch(e){recOn=false;alert('Не удалось запустить запись: '+e.message)}
+  recUi();
+}
+function stopRec(){recOn=false;if(rec)rec.stop();recUi()}
+function recUi(){const b=$('#recBtn');if(!b)return;b.className='btn '+(recOn?'rec':'primary');b.textContent=recOn?'■ Остановить запись':'● Начать запись';const s=$('#recState');if(s)s.textContent=recOn?`Идёт запись (${speechMode})… говорите`:'Запись остановлена'}
+function appendTr(txt){
+  txt=txt.trim();if(!txt)return;
+  const now=new Date(), line=`[${pad(now.getHours())}:${pad(now.getMinutes())}] ${cap(txt)}${/[.!?]$/.test(txt)?'':'.'}`;
+  M.transcript=(M.transcript.trim()?M.transcript.replace(/\s*$/,'\n'):'')+line;
+  const ta=$('#tr');if(ta){ta.value=M.transcript;ta.scrollTop=ta.scrollHeight}
+}
+
+// ---------- извлечение поручений ----------
+const TRIG=/(поруч|подготов|сдела|провер|отправ|направ|согласов|организ|обеспеч|разработ|предостав|доложи|доклад|собрат|собер|выполн|устран|позвон|написа|напиш|закуп|оформ|подпис|состав|контрол|назнач|решит|реши|изучи|проработ|ответствен|срок|нужно|надо|необходимо|должен|должна|прошу|заменить|замени|отремонт|рассчита|посчита|найти|найди|договор|прислать|пришли|внести|внеси|запланир|провести|проведи|сверит|сверь|оплат|пройти|пройди|укомплект|обуч|получи|выда|подай|подать|обнов|исправ|забрать|забери|доставь|доставить)/i;
+const STRONG=/(поруч|задач|ответствен|прошу)/i;
+function stem(w){w=w.toLowerCase().replace(/[^a-zа-яё0-9-]/g,'');for(let i=0;i<2&&w.length>3&&/[аеёиоуыэюяйь]$/.test(w);i++)w=w.slice(0,-1);return w}
+const END='[аеёиоуыэюяйьмхвг]{0,3}';
+function keyRe(phrase){const ws=phrase.trim().split(/\s+/).map(stem).filter(Boolean);if(!ws.length)return null;return new RegExp('(^|[^a-zа-яё])('+ws.map(w=>escRe(w)+END).join('[\\s-]+')+')(?![a-zа-яё])','i')}
+function empKeys(e){const k=[];const sur=(e.name||'').trim().split(/\s+/)[0];if(sur)k.push(sur);
+  const pos=(e.position||'').trim().toLowerCase();if(pos&&S.employees.filter(x=>(x.position||'').trim().toLowerCase()===pos).length===1)k.push(e.position);
+  (e.aliases||'').split(',').forEach(a=>{a=a.trim();if(a)k.push(a)});return k}
+function findEmp(s){
+  const low=s.toLowerCase();let best=null;
+  for(const e of S.employees)for(const k of empKeys(e)){const re=keyRe(k);if(!re)continue;const m=re.exec(low);
+    if(m){const pos=m.index+m[1].length,len=m[2].length;if(!best||pos<best.pos||(pos===best.pos&&len>best.len))best={id:e.id,pos,len}}}
+  return best;
+}
+const WD=[['воскресен',0],['понедельник',1],['вторник',2],['сред',3],['четверг',4],['пятниц',5],['суббот',6]];
+const MN=['январ','феврал','март','апрел','ма','июн','июл','август','сентябр','октябр','ноябр','декабр'];
+const PRE='(?:срок\\s*[:—-]?\\s*)?(?:(?:до|к|ко|в|во|на|не позднее)\\s+)?';
+function parseDue(s,base){
+  const b=parseYmd(base);let m;
+  const R=p=>new RegExp(PRE+p,'i');
+  if(m=s.match(R('(\\d{1,2})[./](\\d{1,2})(?:[./](\\d{2,4}))?'))){let y=m[3]?+m[3]:b.getFullYear();if(y<100)y+=2000;const d=new Date(y,+m[2]-1,+m[1]);if(!m[3]&&d<b)d.setFullYear(y+1);return{date:ymd(d),text:m[0]}}
+  if(m=s.match(R('(\\d{1,2})\\s+(январ|феврал|март|апрел|ма[яй]|июн|июл|август|сентябр|октябр|ноябр|декабр)[а-яё]*'))){const mi=MN.findIndex(k=>m[2].toLowerCase().startsWith(k));const d=new Date(b.getFullYear(),mi,+m[1]);if(d<b)d.setFullYear(d.getFullYear()+1);return{date:ymd(d),text:m[0]}}
+  if(m=s.match(R('послезавтра')))return{date:addDays(base,2),text:m[0]};
+  if(m=s.match(R('завтра(?:шнего дня)?')))return{date:addDays(base,1),text:m[0]};
+  if(m=s.match(R('сегодня(?:шнего дня)?')))return{date:base,text:m[0]};
+  if(m=s.match(/через\s+(\d+|два|две|три|пять)\s+(дн|день|недел)[а-яё]*/i)){const n={два:2,две:2,три:3,пять:5}[m[1].toLowerCase()]||+m[1];return{date:addDays(base,/недел/i.test(m[2])?n*7:n),text:m[0]}}
+  if(m=s.match(/через\s+неделю/i))return{date:addDays(base,7),text:m[0]};
+  if(m=s.match(R('(?:конц[ау]|конец)\\s+недели')))return{date:addDays(monday(base),4),text:m[0]};
+  if(m=s.match(R('(?:конц[ау]|конец)\\s+месяца')))return{date:ymd(new Date(b.getFullYear(),b.getMonth()+1,0)),text:m[0]};
+  if(m=s.match(R('(воскресен|понедельник|вторник|сред|четверг|пятниц|суббот)[а-яё]*'))){const w=WD.find(x=>m[1].toLowerCase().startsWith(x[0]))[1];let n=(w-b.getDay()+7)%7||7;return{date:addDays(base,n),text:m[0]}}
+  return null;
+}
+function extract(text,base){
+  const out=[];
+  const parts=text.split(/\n+|(?<=[.!?;])\s+/).map(x=>x.replace(/^\[\d\d:\d\d\]\s*/,'').trim()).filter(x=>x.length>8);
+  for(const s of parts){
+    const e=findEmp(s), due=parseDue(s,base);
+    if(!((e&&(TRIG.test(s)||due))||(STRONG.test(s)&&s.length>15)))continue;
+    let title=s;
+    if(due)title=title.replace(due.text,' ');
+    if(e){const mm=findEmp(title);if(mm)title=title.slice(0,mm.pos)+' '+title.slice(mm.pos+mm.len)}
+    title=title.replace(/(?<![а-яё])(поручить|поручаю|поручение|задача|ответственн(ый|ая|ые)|прошу|исполнитель)(?![а-яё])[:\s]*/gi,' ')
+      .replace(/\s+([,.;!?])/g,'$1').replace(/\s{2,}/g,' ').replace(/^[\s,.;:—–-]+|[\s,.;:—–-]+$/g,'');
+    out.push({on:true,title:cap(title),assignee:e?e.id:'',due:due?due.date:'',src:s});
+  }
+  return out;
+}
+
+// ---------- СОВЕЩАНИЕ: экран ----------
+function vMeeting(){
+  const saved=S.meetings.find(x=>x.id===M.id), done=saved?S.tasks.filter(t=>t.meetingId===M.id):[];
+  const past=S.meetings.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,15);
+  return `<div class="grid">
+  <div>
+    <div class="card"><h2>${saved?'Совещание':'Новое совещание'}</h2>
+      <div class="row"><input type="text" class="grow" placeholder="Тема совещания" value="${esc(M.title)}" oninput="M.title=this.value">
+        <input type="date" value="${M.date}" onchange="M.date=this.value||today()"></div>
+      <div class="row" style="margin:12px 0 6px">
+        <button id="recBtn" class="btn ${recOn?'rec':'primary'}" onclick="recOn?stopRec():startRec()">${recOn?'■ Остановить запись':'● Начать запись'}</button>
+        <span id="recState" class="muted small">${SR?(recOn?'Идёт запись… говорите':'Распознавание речи на русском'):'Браузер не поддерживает распознавание — используйте Chrome / Яндекс Браузер или вставьте текст'}</span></div>
+      <div id="interim" class="interim small"></div>
+      <textarea id="tr" style="min-height:280px" oninput="M.transcript=this.value" placeholder="Здесь появится расшифровка. Текст можно править, вставлять и набирать вручную.&#10;&#10;Поручения лучше проговаривать так:&#10;«Логисту подготовить график рейсов до пятницы»&#10;«Механику, проверить шины на всех тягачах до 5 ноября»">${esc(M.transcript)}</textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="btn primary" onclick="runExtract()">Выделить поручения →</button>
+        <button class="btn" onclick="demo()">Показать на примере</button>
+        <button class="btn" onclick="if(confirm('Начать новое совещание? Несохранённый текст пропадёт.')){stopRec();M=newDraft();cands=[];render()}">Новое</button>
+      </div>
+    </div>
+  </div>
+  <div>
+    <div class="card"><h2>Поручения к постановке ${cands.length?`(${cands.filter(c=>c.on).length} из ${cands.length})`:''}</h2>${candTable()}</div>
+    ${done.length?`<div class="card"><div class="row between"><h2 style="margin:0">Поставлено по совещанию (${done.length})</h2>
+       <button class="btn sm" onclick="copyText(protocol(S.meetings.find(x=>x.id===M.id)))">Скопировать протокол</button></div>
+       ${done.map(t=>taskRow(t)).join('')}</div>`:''}
+    <div class="card"><h2>Прошлые совещания</h2>${past.length?past.map(x=>`<div class="task"><div class="t"><a href="#" onclick="openMeeting('${x.id}');return false">${esc(x.title)}</a>
+      <span class="muted small">· ${dmy(x.date)} · поручений: ${S.tasks.filter(t=>t.meetingId===x.id).length}</span></div>
+      <button class="btn sm danger" onclick="delMeeting('${x.id}')">✕</button></div>`).join(''):'<p class="muted small">Пока нет.</p>'}</div>
+  </div></div>`;
+}
+function candTable(){
+  if(!cands.length)return `<p class="muted small">Запишите или вставьте текст совещания и нажмите «Выделить поручения». Программа найдёт фразы с фамилиями / должностями из справочника и сроками («до пятницы», «до 5 ноября», «завтра», «через неделю»). Всё можно поправить перед постановкой.</p>
+    ${S.employees.length?'':'<div class="hint">Справочник сотрудников пуст — добавьте сотрудников на вкладке «Сотрудники и данные», иначе исполнитель не определится.</div>'}`;
+  return cands.map((c,i)=>`<div class="task" style="${c.on?'':'opacity:.5'}"><input type="checkbox" ${c.on?'checked':''} onchange="cands[${i}].on=this.checked;render()">
+    <div class="t"><input type="text" style="width:100%" value="${esc(c.title)}" oninput="cands[${i}].title=this.value" placeholder="Текст поручения">
+      <div class="row" style="margin-top:6px"><select class="grow" onchange="cands[${i}].assignee=this.value">${empOpts(c.assignee)}</select>
+        <input type="date" value="${c.due}" onchange="cands[${i}].due=this.value"></div>
+      <div class="muted small" style="margin-top:4px">«${esc(c.src)}»</div></div></div>`).join('')+`
+  <div class="row" style="margin-top:10px"><button class="btn primary" onclick="saveMeeting()">Сохранить и поставить задачи</button>
+    <button class="btn" onclick="cands.push({on:true,title:'',assignee:'',due:'',src:'добавлено вручную'});render()">+ Добавить строку</button></div>`;
+}
+function runExtract(){
+  M.transcript=$('#tr').value;
+  if(!M.transcript.trim())return alert('Нет текста совещания.');
+  const found=extract(M.transcript,M.date);
+  const known=new Set(cands.map(c=>c.src));
+  cands=cands.concat(found.filter(c=>!known.has(c.src)));
+  if(!found.length)alert('Поручений не найдено. Проверьте, что в тексте есть фамилии/должности из справочника и глаголы-действия («подготовить», «проверить»…), или добавьте строки вручную.');
+  render();
+}
+function saveMeeting(){
+  let mt=S.meetings.find(x=>x.id===M.id);
+  if(!mt){mt={id:M.id};S.meetings.push(mt)}
+  Object.assign(mt,{date:M.date,title:M.title.trim()||'Совещание',transcript:M.transcript});
+  M.title=mt.title;
+  const sel=cands.filter(c=>c.on&&c.title.trim());
+  sel.forEach(c=>addTask({title:c.title.trim(),assignee:c.assignee,due:c.due,meetingId:mt.id}));
+  cands=cands.filter(c=>!c.on);
+  save();render();
+}
+function openMeeting(id){const x=S.meetings.find(m=>m.id===id);stopRec();M={id:x.id,date:x.date,title:x.title,transcript:x.transcript||''};cands=[];view='meeting';render()}
+function delMeeting(id){if(!confirm('Удалить совещание? Поставленные по нему задачи останутся.'))return;S.meetings=S.meetings.filter(x=>x.id!==id);S.tasks.forEach(t=>{if(t.meetingId===id)t.meetingId=null});if(M.id===id)M=newDraft();save();render()}
+function protocol(mt){
+  const ts=S.tasks.filter(t=>t.meetingId===mt.id);
+  return `ПРОТОКОЛ СОВЕЩАНИЯ\nТема: ${mt.title}\nДата: ${dmy(mt.date)}\n\nПОРУЧЕНИЯ:\n`+ts.map((t,i)=>{const e=emp(t.assignee);
+    return `${i+1}. ${t.title}\n   Ответственный: ${e?e.name+(e.position?' ('+e.position+')':''):'Я'}\n   Срок: ${dmy(t.due)}`}).join('\n');
+}
+function demo(){
+  if(!S.employees.length){
+    [['Логист','Логист','логистика'],['Механик','Механик','гараж, ремзона'],['Офис-менеджер','Офис-менеджер','офис менеджер'],['Бухгалтер','Главный бухгалтер','бухгалтерия'],['Продажи','Руководитель отдела продаж','отдел продаж, продажник']]
+      .forEach(([n,p,a])=>S.employees.push({id:uid(),name:n,position:p,aliases:a}));save();
+    alert('Добавлены демонстрационные сотрудники по должностям. Замените их на реальных на вкладке «Сотрудники и данные».');
+  }
+  M.title=M.title||'Планёрка (пример)';
+  M.transcript=`[09:00] Логисту подготовить график рейсов на следующую неделю до пятницы.
+[09:03] Механику проверить шины на всех тягачах и доложить до 5 ноября.
+[09:05] По загрузке в целом идём по плану, вопросов нет.
+[09:07] Бухгалтерия, сверить топливные карты за октябрь завтра.
+[09:10] Отделу продаж направить коммерческое предложение клиенту через неделю.
+[09:12] Поручение: обновить регламент приёма заявок, срок конец месяца.`;
+  cands=[];render();runExtract();
+}
+
+// ---------- ПОРУЧЕНИЯ ----------
+function vTasks(){
+  let ts=S.tasks.slice();
+  if(fA!=='all')ts=ts.filter(t=>t.assignee===(fA==='me'?'':fA));
+  ts=ts.filter(t=>fS==='all'||(fS==='open'&&t.status!=='done')||(fS==='done'&&t.status==='done')||(fS==='over'&&isOver(t))||(fS==='progress'&&t.status==='progress'));
+  ts.sort((a,b)=>(a.due||'9999').localeCompare(b.due||'9999'));
+  const groups=[['','Я'],...S.employees.map(e=>[e.id,e.name+(e.position?' — '+e.position:'')])];
+  const known=new Set(groups.map(g=>g[0]));const orphan=ts.filter(t=>!known.has(t.assignee));
+  const body=groups.map(([id,n])=>{const g=ts.filter(t=>t.assignee===id);return g.length?`<div class="group"><h3>${esc(n)} · ${g.length}</h3>${g.map(t=>taskRow(t,true)).join('')}</div>`:''}).join('')
+    +(orphan.length?`<div class="group"><h3>Без исполнителя</h3>${orphan.map(t=>taskRow(t,true)).join('')}</div>`:'');
+  return `<div class="card"><div class="row between">
+    <div class="row"><select onchange="fA=this.value;render()"><option value="all">Все исполнители</option><option value="me" ${fA==='me'?'selected':''}>Я</option>
+      ${S.employees.map(e=>`<option value="${e.id}" ${fA===e.id?'selected':''}>${esc(e.name)}</option>`).join('')}</select>
+    <select onchange="fS=this.value;render()">${[['open','Невыполненные'],['progress','В работе'],['over','Просроченные'],['done','Выполненные'],['all','Все']].map(([k,v])=>`<option value="${k}" ${fS===k?'selected':''}>${v}</option>`).join('')}</select></div>
+    <div class="row"><button class="btn" onclick="copyText(tasksText(${JSON.stringify(ts.map(t=>t.id)).replace(/"/g,"'")}))">Скопировать список</button><button class="btn" onclick="exportCsv()">Excel (CSV)</button>${S.settings.b24?`<button class="btn" onclick="b24Sync()">⇄ Битрикс24</button>`:''}</div>
+  </div></div>
+  <div class="card">${ts.length?body:'<p class="muted">Задач по выбранному фильтру нет.</p>'}</div>`;
+}
+function tasksText(ids){const ts=ids.map(id=>S.tasks.find(t=>t.id===id));
+  return groupBy(ts).map(([n,g])=>`${n}:\n`+g.map((t,i)=>`  ${i+1}. ${t.title} — срок ${dmy(t.due)}${t.status==='done'?' (выполнено)':''}`).join('\n')).join('\n\n')}
+function groupBy(ts){const m=new Map();ts.forEach(t=>{const n=empName(t.assignee);if(!m.has(n))m.set(n,[]);m.get(n).push(t)});return[...m]}
+
+// ---------- АНАЛИТИКА ----------
+function vStats(){
+  const ws=weekStart, days=[...Array(7)].map((_,i)=>addDays(ws,i)), we=days[6], t0=today();
+  const inW=s=>s&&s>=ws&&s<=we;
+  const created=S.tasks.filter(t=>inW(t.created)), done=S.tasks.filter(t=>inW(t.doneAt));
+  const dueW=S.tasks.filter(t=>inW(t.due)), dueDone=dueW.filter(t=>t.status==='done');
+  const over=S.tasks.filter(t=>isOver(t)&&t.due<=we);
+  const rate=dueW.length?Math.round(dueDone.length/dueW.length*100):0;
+  const perDay=days.map(d=>({d,c:S.tasks.filter(t=>t.created===d).length,x:S.tasks.filter(t=>t.doneAt===d).length}));
+  const mx=Math.max(1,...perDay.map(p=>Math.max(p.c,p.x)));
+  const ratings=days.map(d=>S.days[d]?.rating).filter(Boolean), avg=ratings.length?(ratings.reduce((a,b)=>a+b,0)/ratings.length).toFixed(1):'—';
+  const filled=days.filter(d=>S.days[d]&&(S.days[d].notes||S.days[d].summary)).length;
+  const people=[['','Я'],...S.employees.map(e=>[e.id,e.name])].map(([id,n])=>{
+    const ts=S.tasks.filter(t=>t.assignee===id&&(inW(t.due)||inW(t.created)||inW(t.doneAt)));
+    const dn=ts.filter(t=>t.status==='done'), ontime=dn.filter(t=>!t.due||t.doneAt<=t.due), ov=ts.filter(isOver);
+    return {n,all:ts.length,dn:dn.length,ontime:ontime.length,ov:ov.length,p:ts.length?Math.round(dn.length/ts.length*100):0};
+  }).filter(p=>p.all);
+  const meets=S.meetings.filter(m=>inW(m.date));
+  return `<div class="card row between">
+    <div class="row"><button class="btn" onclick="weekStart=addDays(weekStart,-7);render()">←</button>
+    <b>Неделя ${dmy(ws)} — ${dmy(we)}</b><button class="btn" onclick="weekStart=addDays(weekStart,7);render()">→</button>
+    ${ws!==monday(t0)?`<button class="btn" onclick="weekStart=monday(today());render()">Текущая</button>`:''}</div>
+    <button class="btn primary" onclick="copyText(weekReport())">Скопировать отчёт за неделю</button></div>
+  <div class="card"><div class="stats">
+    <div class="stat"><span class="muted small">Поставлено задач</span><b>${created.length}</b></div>
+    <div class="stat"><span class="muted small">Выполнено</span><b style="color:var(--ok)">${done.length}</b></div>
+    <div class="stat"><span class="muted small">Исполнение в сроки недели</span><b>${rate}%</b><span class="muted small">${dueDone.length} из ${dueW.length}</span></div>
+    <div class="stat"><span class="muted small">Просрочено сейчас</span><b style="color:${over.length?'var(--bad)':'inherit'}">${over.length}</b></div>
+  </div>
+  <p class="muted small" style="margin:12px 0 0">Совещаний: ${meets.length} · дней с записями: ${filled} из 7 · средняя оценка дня: ${avg}</p></div>
+  <div class="grid">
+    <div class="card"><h2>По дням</h2><div class="legend small muted"><span><i class="c1"></i>поставлено</span><span><i class="c2"></i>выполнено</span></div>
+      <div class="bars">${perDay.map(p=>`<div class="day" title="${dmy(p.d)}: поставлено ${p.c}, выполнено ${p.x}"><span class="small">${p.c||p.x?p.c+'/'+p.x:''}</span>
+        <div class="cols"><div class="c1" style="height:${p.c/mx*100}%"></div><div class="c2" style="height:${p.x/mx*100}%"></div></div>
+        <span class="small muted">${parseYmd(p.d).toLocaleDateString('ru-RU',{weekday:'short'})}</span></div>`).join('')}</div></div>
+    <div class="card"><h2>По исполнителям</h2>${people.length?`<div class="scroll"><table><tr><th>Исполнитель</th><th>Всего</th><th>Вып.</th><th>В срок</th><th>Проср.</th><th>%</th></tr>
+      ${people.map(p=>`<tr><td>${esc(p.n)}</td><td>${p.all}</td><td>${p.dn}</td><td>${p.ontime}</td><td style="color:${p.ov?'var(--bad)':'inherit'}">${p.ov}</td>
+      <td><div class="pbar"><div style="width:${p.p}%"></div></div><span class="small">${p.p}%</span></td></tr>`).join('')}</table></div>`:'<p class="muted small">Нет задач за эту неделю.</p>'}</div>
+  </div>
+  <div class="card"><h2>Итоги дней</h2>${days.map(d=>S.days[d]?.summary?`<p><b>${parseYmd(d).toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'})}</b>${S.days[d].rating?' · '+'★'.repeat(S.days[d].rating):''}<br>${esc(S.days[d].summary).replace(/\n/g,'<br>')}</p>`:'').join('')||'<p class="muted small">Итоги дней за эту неделю не заполнены.</p>'}</div>`;
+}
+function weekReport(){
+  const ws=weekStart, we=addDays(ws,6), inW=s=>s&&s>=ws&&s<=we;
+  const L=[`ОТЧЁТ ЗА НЕДЕЛЮ ${dmy(ws)} — ${dmy(we)}`,''];
+  L.push(`Поставлено задач: ${S.tasks.filter(t=>inW(t.created)).length}`,`Выполнено: ${S.tasks.filter(t=>inW(t.doneAt)).length}`,`Совещаний: ${S.meetings.filter(m=>inW(m.date)).length}`,'');
+  const ov=S.tasks.filter(t=>isOver(t)&&t.due<=we);
+  if(ov.length){L.push('ПРОСРОЧЕНО:');groupBy(ov).forEach(([n,g])=>{L.push(`  ${n}:`);g.forEach(t=>L.push(`   – ${t.title} (срок ${dmy(t.due)})`))});L.push('')}
+  const dn=S.tasks.filter(t=>inW(t.doneAt));
+  if(dn.length){L.push('ВЫПОЛНЕНО:');groupBy(dn).forEach(([n,g])=>{L.push(`  ${n}:`);g.forEach(t=>L.push(`   – ${t.title}`))});L.push('')}
+  const sm=[...Array(7)].map((_,i)=>addDays(ws,i)).filter(d=>S.days[d]?.summary);
+  if(sm.length){L.push('ИТОГИ ДНЕЙ:');sm.forEach(d=>L.push(`  ${dmy(d)}: ${S.days[d].summary.replace(/\n/g,'; ')}`))}
+  return L.join('\n');
+}
+
+// ---------- СОТРУДНИКИ И ДАННЫЕ ----------
+function vPeople(){
+  return `<div class="grid"><div>
+  <div class="card"><h2>Справочник сотрудников</h2>
+    <div class="hint">По этому списку программа узнаёт исполнителей в тексте совещания: по <b>фамилии</b> (первое слово), по <b>должности</b> и по <b>другим названиям</b> через запятую — например «Петрович, гараж». Падежи учитываются: «Иванову», «логисту», «главному инженеру».</div>
+    <div class="row"><input type="text" id="en" class="grow" placeholder="Фамилия Имя Отчество"><input type="text" id="ep" class="grow" placeholder="Должность"></div>
+    <div class="row" style="margin-top:8px"><input type="text" id="ea" class="grow" placeholder="Другие названия через запятую"><input type="text" id="eb" style="width:130px" placeholder="ID в Битрикс24"><button class="btn primary" onclick="addEmp()">Добавить</button></div>
+    <div class="scroll" style="margin-top:12px"><table><tr><th>ФИО</th><th>Должность</th><th>Другие названия</th><th>ID Б24</th><th></th></tr>
+    ${S.employees.map(e=>`<tr>${['name','position','aliases','b24'].map(k=>`<td><input type="text" value="${esc(e[k]||'')}" onchange="setEmp('${e.id}','${k}',this.value)"></td>`).join('')}
+      <td><button class="btn sm danger" onclick="delEmp('${e.id}')">✕</button></td></tr>`).join('')||'<tr><td colspan="5" class="muted small">Пока пусто</td></tr>'}</table></div>
+  </div></div><div>
+  <div class="card"><h2>🛡 Защита данных</h2>
+    <table class="small">
+      <tr><td>Где хранятся данные</td><td>Только на этом устройстве, в памяти браузера. На GitHub, в Google и другие сервисы не передаются.</td></tr>
+      <tr><td>Шифрование</td><td>${pinRec()?'<b style="color:var(--ok)">Включено</b> — AES-256, ключ из ПИН-кода':'<b style="color:var(--bad)">Выключено</b> — установите ПИН-код ниже'}</td></tr>
+      <tr><td>Распознавание речи</td><td>Сначала на устройстве (если планшет поддерживает). Облако Google — ${S.settings.cloudSpeech?'<b>разрешено</b> <button class="btn sm" onclick="S.settings.cloudSpeech=false;save();render()">Запретить</button>':'запрещено, спросит при первой записи'}</td></tr>
+      <tr><td>Связь с внешними сайтами</td><td>Заблокирована. Разрешён только облачный Битрикс24 (.ru)${S.settings.b24?' — подключён':' — не подключён'}.</td></tr>
+      <tr><td>Резервные копии</td><td>${pinRec()?'Шифруются ПИН-кодом':'Без ПИН-кода — не шифруются'}. Excel-выгрузка не шифруется.</td></tr>
+    </table></div>
+  <div class="card"><h2>ПИН-код на вход</h2>
+    <p class="muted small">${pinRec()?`ПИН-код включён, данные зашифрованы. Ежедневник закрывается при сворачивании и через ${LOCK_MIN} минут бездействия (во время записи совещания — не закрывается).`:'ПИН-код не установлен — ежедневник открывается без пароля.'}</p>
+    <div class="row">${pinRec()?`<button class="btn" onclick="showLock('set1')">Сменить ПИН</button><button class="btn" onclick="lockNow()">Заблокировать сейчас</button><button class="btn danger" onclick="pinOff()">Отключить</button>`
+      :`<button class="btn primary" onclick="showLock('set1')">Установить ПИН-код</button>`}</div>
+    <p class="muted small">Забытый ПИН восстановить нельзя (данные зашифрованы): останется только удалить все данные и вернуть их из резервной копии. Поэтому сохраняйте копию регулярно.</p></div>
+  <div class="card"><h2>💻 ⇄ 📱 Работа с Mac и с планшета</h2>
+    <p class="muted small">Ежедневник открывается по одной ссылке и на Mac, и на планшете, но данные каждое устройство хранит у себя. Чтобы свести их вместе:<br>
+      <b>1.</b> На устройстве, где вносили записи, нажмите «Выгрузить для другого устройства».<br>
+      <b>2.</b> Перенесите файл на другое устройство (кабель, рабочая почта, флешка).<br>
+      <b>3.</b> Там нажмите «Загрузить с другого устройства» — записи объединятся, ничего не затрётся: по каждой записи останется самая свежая версия.<br>
+      Удобно ставить одинаковый ПИН на обоих устройствах.</p>
+    <div class="row"><button class="btn primary" onclick="exportJson()">Выгрузить для другого устройства</button>
+      <label class="btn">Загрузить с другого устройства<input type="file" accept=".json" style="display:none" onchange="importJson(this.files[0],'merge');this.value=''"></label></div></div>
+  <div class="card"><h2>Резервная копия</h2>
+    <p class="muted small">Данные хранятся только на этом устройстве. Раз в неделю сохраняйте копию на рабочий компьютер или флешку — не в облако и не в личные мессенджеры.</p>
+    <div class="row"><button class="btn primary" onclick="exportJson()">Сохранить копию (JSON)</button>
+      <label class="btn">Загрузить сотрудников<input type="file" accept=".json" style="display:none" onchange="importJson(this.files[0],'merge');this.value=''"></label>
+      <label class="btn">Восстановить из копии (заменить всё)<input type="file" accept=".json" style="display:none" onchange="importJson(this.files[0],'replace');this.value=''"></label>
+      <button class="btn" onclick="exportCsv()">Задачи в Excel (CSV)</button></div></div>
+  <div class="card"><h2>Битрикс24 — синхронизация (необязательно)</h2>
+    <p class="muted small">Пока адрес не указан, ежедневник с Битрикс24 не связан. Когда понадобится: в Битрикс24 откройте <b>Разработчикам → Другое → Входящий вебхук</b>, отметьте права <b>«Задачи» (task)</b> и <b>«Пользователи» (user)</b>, сохраните и вставьте адрес сюда.</p>
+    <div class="row"><input type="text" id="b24" class="grow" placeholder="https://ваша-компания.bitrix24.ru/rest/1/xxxxxxxx/" value="${esc(S.settings.b24||'')}">
+      <button class="btn" onclick="b24Save()">Сохранить</button></div>
+    ${S.settings.b24?`<div class="row" style="margin-top:10px">
+      <button class="btn" onclick="b24Check()">Проверить связь</button>
+      <button class="btn" onclick="b24Users()">Подтянуть ID сотрудников</button>
+      <button class="btn primary" onclick="b24Sync()">⇄ Синхронизировать задачи</button></div>
+    <p class="muted small" style="margin-bottom:0">Синхронизация: новые невыполненные поручения уходят в Битрикс24 (исполнитель — сотрудник с заполненным «ID Б24»; ваши — если указан ваш ID), а статусы и сроки уже отправленных задач подтягиваются обратно.
+      ${S.settings.myB24?`Ваш ID: ${esc(S.settings.myB24)}.`:''} ${S.settings.b24last?`Последняя синхронизация: ${esc(S.settings.b24last)}.`:''}</p>`:''}
+  </div>
+  </div></div>`;
+}
+function addEmp(){const n=$('#en').value.trim();if(!n)return alert('Укажите ФИО или должность');S.employees.push({id:uid(),name:n,position:$('#ep').value.trim(),aliases:$('#ea').value.trim(),b24:$('#eb').value.trim()});save();render();$('#en').focus()}
+function setEmp(id,k,v){emp(id)[k]=v.trim();save()}
+function delEmp(id){if(!confirm('Удалить сотрудника? Его задачи останутся без исполнителя.'))return;S.employees=S.employees.filter(e=>e.id!==id);save();render()}
+function download(name,data,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+async function exportJson(){
+  const r=pinRec();
+  if(r&&cryptoKey){const env=JSON.parse(await encWith(cryptoKey,JSON.stringify(S)));
+    return download(`ежедневник_${/Android/i.test(navigator.userAgent)?'планшет':'компьютер'}_${today()}.json`,JSON.stringify(Object.assign({diaryBackup:1,salt:r.salt,iter:r.iter},env)),'application/json')}
+  if(!confirm('ПИН-код не включён, поэтому копия будет НЕ зашифрована: любой, кто получит файл, прочитает данные сотрудников. Включите ПИН-код, чтобы копия шифровалась.\n\nВсё равно сохранить открытую копию?'))return;
+  download(`ежедневник_копия_${today()}.json`,JSON.stringify(S,null,1),'application/json');
+}
+function importJson(f,mode){if(!f)return;const r=new FileReader();r.onload=async()=>{try{let d=JSON.parse(r.result);
+  if(d.enc){
+    const pin=prompt('Копия зашифрована. Введите ПИН-код, с которым она была сделана:');if(!pin)return;
+    try{d=JSON.parse(await decWith(await deriveKey(pin.trim(),d.salt,d.iter),d))}catch(e){return alert('Неверный ПИН-код для этой копии.')}
+  }
+  if(Array.isArray(d.employees)&&!Array.isArray(d.tasks)){
+    const have=new Set(S.employees.map(e=>e.name.trim().toLowerCase()));
+    const add=d.employees.filter(e=>e&&e.name&&!have.has(e.name.trim().toLowerCase()));
+    if(!add.length)return alert('Все сотрудники из файла уже есть в справочнике.');
+    if(!confirm(`Добавить в справочник сотрудников: ${add.length}? Остальные данные не изменятся.`))return;
+    add.forEach(e=>S.employees.push({id:uid(),name:e.name.trim(),position:(e.position||'').trim(),aliases:(e.aliases||'').trim(),b24:(e.b24||'').toString().trim()}));
+    save();render();return alert('Сотрудники добавлены: '+add.length);
+  }
+  if(!Array.isArray(d.tasks))throw new Error('не похоже на копию ежедневника');
+  if(mode==='merge'){const n=mergeIn(d);save();render();
+    return alert(`Данные объединены.\nДобавлено или обновлено: задач — ${n.task}, совещаний — ${n.meet}, дней — ${n.day}, сотрудников — ${n.emp}.`)}
+  if(!confirm('Заменить ВСЕ текущие данные данными из копии? Внесённое на этом устройстве после создания копии пропадёт.'))return;
+  S=Object.assign(EMPTY(),d);snapMap=null;stamp();save();render();alert('Данные восстановлены')}catch(e){alert('Ошибка: '+e.message)}};r.readAsText(f)}
+function exportCsv(){if(!confirm('Файл Excel (CSV) не шифруется: в нём поручения и ФИО сотрудников. Храните его только на рабочих устройствах и не пересылайте в личные мессенджеры. Продолжить?'))return;const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const rows=[['Задача','Исполнитель','Должность','Срок','Статус','Поставлена','Выполнена','Совещание'],...S.tasks.map(t=>{const e=emp(t.assignee),m=S.meetings.find(x=>x.id===t.meetingId);
+    return[t.title,empName(t.assignee),e?.position||'',dmy(t.due),STATUS[t.status],dmy(t.created),t.doneAt?dmy(t.doneAt):'',m?m.title+' '+dmy(m.date):'']})];
+  download(`поручения_${today()}.csv`,'\ufeff'+rows.map(r=>r.map(q).join(';')).join('\r\n'),'text/csv')}
+// ---------- Битрикс24 (входящий вебхук) ----------
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function b24(method,params){
+  const p=new URLSearchParams();
+  const add=(k,v)=>{if(Array.isArray(v))v.forEach((x,i)=>add(`${k}[${i}]`,x));else if(v&&typeof v==='object')Object.entries(v).forEach(([kk,vv])=>add(`${k}[${kk}]`,vv));else p.append(k,v)};
+  Object.entries(params||{}).forEach(([k,v])=>add(k,v));
+  let r;
+  try{r=await fetch(S.settings.b24+method+'.json',{method:'POST',body:p})}catch(e){throw new Error('нет связи с Битрикс24 — проверьте интернет и адрес вебхука')}
+  const j=await r.json().catch(()=>({error:'HTTP '+r.status}));
+  if(j.error)throw new Error(j.error_description||j.error);
+  await sleep(550); // Битрикс24 принимает не больше 2 запросов в секунду
+  return j;
+}
+function b24Save(){let v=$('#b24').value.trim();if(v&&!v.endsWith('/'))v+='/';
+  if(v&&!/^https:\/\/[a-z0-9-]+\.bitrix24\.ru\/rest\/\d+\/[a-z0-9]+\/$/i.test(v))
+    return alert('Разрешены только адреса облачного Битрикс24 в зоне .ru (данные хранятся в РФ), вида:\nhttps://компания.bitrix24.ru/rest/1/код/\n\nДля коробочной версии Битрикс24 на своём сервере адрес нужно добавить в настройки безопасности файла (строка Content-Security-Policy).');
+  S.settings.b24=v;save();render()}
+async function b24Check(){
+  try{const j=await b24('profile');const u=j.result;S.settings.myB24=String(u.ID);save();render();
+    alert(`Связь есть. Вебхук создан от имени: ${u.LAST_NAME||''} ${u.NAME||''} (ID ${u.ID}).\nЭтот ID записан как ваш — ваши личные задачи тоже будут уходить в Битрикс24.`)}
+  catch(e){alert('Ошибка: '+e.message)}
+}
+const norm=s=>String(s||'').toLowerCase().replace(/ё/g,'е').replace(/[^а-яa-z]/g,'');
+async function b24Users(){
+  try{
+    let users=[],start=0;
+    do{const j=await b24('user.get',{ACTIVE:'true',start});users=users.concat(j.result);start=j.next}while(start);
+    let found=0;const miss=[];
+    for(const e of S.employees){if(e.b24)continue;
+      const [last,first]=e.name.trim().split(/\s+/);
+      const c=users.filter(u=>norm(u.LAST_NAME)===norm(last)&&(!first||norm(u.NAME).startsWith(norm(first).slice(0,1))&&(norm(first).length<=1||norm(u.NAME)===norm(first))));
+      if(c.length===1){e.b24=String(c[0].ID);found++}else miss.push(e.name+(c.length>1?' (несколько совпадений)':''));
+    }
+    save();render();
+    alert(`В Битрикс24 пользователей: ${users.length}. Найдено и записано ID: ${found}.`+(miss.length?`\n\nНе найдены (впишите ID вручную или их нет в Битрикс24):\n${miss.slice(0,25).join('\n')}${miss.length>25?'\n…':''}`:''));
+  }catch(e){alert('Ошибка: '+e.message)}
+}
+const respId=t=>t.assignee?emp(t.assignee)?.b24:S.settings.myB24;
+async function b24Sync(){
+  const send=S.tasks.filter(t=>t.status!=='done'&&!t.b24id&&respId(t));
+  const linked=S.tasks.filter(t=>t.b24id);
+  if(!confirm(`Отправить в Битрикс24 новых задач: ${send.length}.\nОбновить статусы уже отправленных: ${linked.length}.\n\nПродолжить?`))return;
+  let sent=0,upd=0,err='';
+  for(const t of send){
+    const mt=t.meetingId&&S.meetings.find(x=>x.id===t.meetingId);
+    const f={TITLE:t.title,RESPONSIBLE_ID:respId(t),DESCRIPTION:'Поставлено из ежедневника'+(mt?`. Совещание «${mt.title}» от ${dmy(mt.date)}`:'')};
+    if(t.due)f.DEADLINE=t.due+'T18:00:00';
+    try{const j=await b24('tasks.task.add',{fields:f});const id=j.result?.task?.id;if(id){t.b24id=String(id);sent++;save()}}catch(e){err=e.message}
+  }
+  const ids=S.tasks.filter(t=>t.b24id).map(t=>t.b24id);
+  for(let i=0;i<ids.length;i+=50){
+    try{const j=await b24('tasks.task.list',{filter:{ID:ids.slice(i,i+50)},select:['ID','STATUS','DEADLINE']});
+      for(const bt of j.result?.tasks||[]){const t=S.tasks.find(x=>x.b24id===String(bt.id));if(!t)continue;
+        const st=+bt.status, ns=st===4||st===5?'done':st===3?'progress':'new', nd=bt.deadline?String(bt.deadline).slice(0,10):t.due;
+        if(ns!==t.status||nd!==t.due){t.status=ns;t.doneAt=ns==='done'?(t.doneAt||today()):null;t.due=nd;upd++}}
+    }catch(e){err=e.message}
+  }
+  const now=new Date();S.settings.b24last=`${dmy(today())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  save();render();
+  alert(`Отправлено новых задач: ${sent} из ${send.length}.\nОбновлено из Битрикс24: ${upd}.`+(err?`\n\nОшибка: ${err}`:''));
+}
+function copyText(txt){
+  const done=()=>alert('Скопировано в буфер обмена — можно вставить в мессенджер, письмо или Word.');
+  if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(txt).then(done,()=>fallback());else fallback();
+  function fallback(){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done()}catch(e){prompt('Скопируйте текст:',txt)}ta.remove()}
+}
+// ---------- ПИН-код и шифрование ----------
+// Пока ПИН включён, все данные (записи, задачи, сотрудники, адрес вебхука) хранятся зашифрованными AES-256.
+// Ключ получается из ПИН (PBKDF2) и живёт только в памяти, пока ежедневник открыт.
+const PIN_KEY='diary.pin', LOCK_MIN=5, PIN_LEN=6, PBKDF2_ITER=310000;
+let unlocked=false, cryptoKey=null, pinMode=null, pinBuf='', pinFirst='', pinFails=0, pinWaitUntil=0, idleTimer=null, waitTimer=null, pinBusy=false;
+function pinRec(){try{return JSON.parse(localStorage.getItem(PIN_KEY)||'null')}catch(e){return null}}
+const canCrypt=()=>!!(window.crypto&&crypto.subtle);
+const b64=buf=>{const u=new Uint8Array(buf);let s='';for(let i=0;i<u.length;i+=32768)s+=String.fromCharCode.apply(null,u.subarray(i,i+32768));return btoa(s)};
+const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+async function deriveKey(pin,salt,iter){
+  const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pin),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:unb64(salt),iterations:iter||PBKDF2_ITER,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function encWith(key,text){const iv=crypto.getRandomValues(new Uint8Array(12));const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(text));return JSON.stringify({enc:1,iv:b64(iv),ct:b64(ct)})}
+async function decWith(key,env){const e=typeof env==='string'?JSON.parse(env):env;return new TextDecoder().decode(await crypto.subtle.decrypt({name:'AES-GCM',iv:unb64(e.iv)},key,unb64(e.ct)))}
+function showLock(mode){
+  if((mode==='set1')&&!canCrypt())return alert('Шифрование недоступно: откройте ежедневник по https-ссылке (GitHub Pages) в Google Chrome.');
+  pinMode=mode;pinBuf='';
+  if(mode==='unlock'){unlocked=false;cryptoKey=null;S=EMPTY();snapMap=null;$('#main').innerHTML=''}
+  if(!$('#lock')){const el=document.createElement('div');el.id='lock';document.body.appendChild(el)}
+  drawLock();
+}
+function drawLock(msg){
+  const el=$('#lock');if(!el)return;
+  const title={unlock:'Введите ПИН-код',set1:`Придумайте ПИН-код из ${PIN_LEN} цифр`,set2:'Повторите ПИН-код'}[pinMode];
+  const wait=Math.ceil((pinWaitUntil-Date.now())/1000);
+  el.innerHTML=`<div class="box"><div style="font-size:34px">🔒</div><b>${title}</b>
+    <div class="dots">${[...Array(PIN_LEN)].map((_,i)=>`<i class="${i<pinBuf.length?'f':''}"></i>`).join('')}</div>
+    <div class="small" style="min-height:1.4em;color:${pinBusy?'var(--muted)':'var(--bad)'}">${pinBusy?'Проверяю…':msg||(wait>0?`Слишком много попыток. Подождите ${wait} с`:'')}</div>
+    <div class="pad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button onclick="pinKey('${n}')">${n}</button>`).join('')}
+      ${pinMode==='unlock'?`<button class="small" onclick="pinForgot()">Забыли?</button>`:`<button class="small" onclick="pinCancel()">Отмена</button>`}
+      <button onclick="pinKey('0')">0</button><button onclick="pinKey('del')" aria-label="Стереть">⌫</button></div></div>`;
+}
+function shake(){const b=$('#lock .box');if(b){b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake')}}
+async function pinKey(k){
+  if(pinBusy)return;
+  if(pinMode==='unlock'&&Date.now()<pinWaitUntil)return drawLock();
+  if(k==='del'){pinBuf=pinBuf.slice(0,-1);return drawLock()}
+  if(pinBuf.length>=PIN_LEN)return;
+  pinBuf+=k;drawLock();
+  if(pinBuf.length<PIN_LEN)return;
+  const pin=pinBuf;pinBuf='';
+  if(pinMode==='unlock'){
+    const r=pinRec();pinBusy=true;drawLock();
+    let ok=false;
+    try{const key=await deriveKey(pin,r.salt,r.iter);await decWith(key,r.check);cryptoKey=key;ok=true;
+      const raw=localStorage.getItem(KEY);S=Object.assign(EMPTY(),raw?JSON.parse(raw.includes('"enc":1')?await decWith(key,raw):raw):{});
+      if(raw&&!raw.includes('"enc":1'))save(); // данные остались открытыми — шифруем
+    }catch(e){if(ok){alert('Не удалось прочитать данные: '+e.message)}}
+    pinBusy=false;
+    if(ok){pinFails=0;return unlock()}
+    if(++pinFails>=5){pinFails=0;pinWaitUntil=Date.now()+30000;clearInterval(waitTimer);waitTimer=setInterval(()=>{drawLock();if(Date.now()>=pinWaitUntil)clearInterval(waitTimer)},1000)}
+    drawLock(pinFails?`Неверный ПИН. Осталось попыток: ${5-pinFails}`:'');shake();
+  }else if(pinMode==='set1'){pinFirst=pin;pinMode='set2';drawLock()}
+  else{
+    if(pin!==pinFirst){pinMode='set1';drawLock('ПИН-коды не совпали, попробуйте ещё раз');return shake()}
+    pinBusy=true;drawLock();
+    try{
+      const salt=b64(crypto.getRandomValues(new Uint8Array(16))), key=await deriveKey(pin,salt,PBKDF2_ITER);
+      const check=await encWith(key,'diary-ok');
+      cryptoKey=key;localStorage.setItem(PIN_KEY,JSON.stringify({v:2,salt,iter:PBKDF2_ITER,check}));
+      save();await saving;
+    }catch(e){alert('Не удалось включить шифрование: '+e.message)}
+    pinBusy=false;unlock();
+  }
+}
+function unlock(){unlocked=true;pinMode=null;if(!snapMap)stamp();const el=$('#lock');if(el)el.remove();render();resetIdle()}
+function pinCancel(){unlock()}
+async function pinOff(){
+  if(!confirm('Отключить ПИН-код? Данные будут храниться на устройстве без шифрования.'))return;
+  await saving;localStorage.removeItem(PIN_KEY);cryptoKey=null;save();render();
+}
+function pinForgot(){
+  if(!confirm('Забытый ПИН-код восстановить нельзя — данные зашифрованы.\n\nМожно удалить ВСЕ данные ежедневника и начать заново, а потом вернуть записи из резервной копии, если она есть (для зашифрованной копии понадобится ПИН, с которым она сделана).\n\nУдалить все данные?'))return;
+  if(!confirm('Точно удалить все записи, задачи, совещания и сотрудников с этого устройства?'))return;
+  localStorage.removeItem(KEY);localStorage.removeItem(PIN_KEY);cryptoKey=null;S=EMPTY();snapMap=null;unlock();
+}
+async function lockNow(){if(pinRec()&&unlocked){await saving;showLock('unlock')}}
+function resetIdle(){clearTimeout(idleTimer);if(pinRec())idleTimer=setTimeout(()=>{if(recOn)resetIdle();else lockNow()},LOCK_MIN*60000)}
+// закрывать при сворачивании приложения или выключении экрана
+document.addEventListener('visibilitychange',()=>{if(document.hidden)lockNow()});
+['pointerdown','keydown','scroll'].forEach(ev=>document.addEventListener(ev,()=>{if(unlocked)resetIdle()},{passive:true}));
+document.addEventListener('keydown',e=>{if(!$('#lock'))return;if(/^\d$/.test(e.key))pinKey(e.key);else if(e.key==='Backspace')pinKey('del')});
+
+if(pinRec())showLock('unlock');else unlock();
+// установка как приложение и работа без интернета (только при открытии по https)
+if('serviceWorker' in navigator&&location.protocol!=='file:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+// просим браузер не удалять данные при нехватке памяти
+if(navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
+</script>
+</body>
+</html>
